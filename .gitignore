@@ -18,3 +18,5 @@ lerna-debug.log*
 build
 dist
 .yarn
+
+.DS_Store
