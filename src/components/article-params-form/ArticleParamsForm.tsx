@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ArrowButton } from 'components/arrow-button';
 import { Button } from 'components/button';
 import { Text } from '../text';
@@ -7,6 +7,7 @@ import { Separator } from '../separator';
 import { RadioGroup } from '../radio-group';
 import { fontFamilyOptions, fontColors, backgroundColors, contentWidthArr, fontSizeOptions } from 'src/constants/articleProps';
 import { OptionType } from 'src/constants/articleProps';
+import { clsx } from 'clsx';
 
 import styles from './ArticleParamsForm.module.scss';
 
@@ -48,10 +49,35 @@ export const ArticleParamsForm = () => {
 		console.log(option);
 	};
 
+	// modal open/close logic
+	const [isOpen, setIsOpen] = useState<boolean>(false);
+	const modalRef = useRef<HTMLDivElement>(null);
+	const handleButtonOpen = () => {
+		setIsOpen(!isOpen);
+	}
+
+	useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        setIsOpen(false); 
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside); 
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside); 
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
 	return (
 		<>
-			<ArrowButton/>
-			<aside className={styles.container}>
+			<ArrowButton isOpen={isOpen} onClick={handleButtonOpen}/>
+			<aside ref={modalRef} className={clsx(styles.container, { [styles.container_open]: isOpen })}>
 				<form className={styles.form}>
 					<div className={styles.wrapperWithMarginBottom}>
 						<Text as="h1" uppercase={true} weight={800} size={31}>Задайте параметры</Text>
@@ -105,8 +131,8 @@ export const ArticleParamsForm = () => {
 						/>
 					</div>
 					<div className={styles.bottomContainer}>
-						<Button title='Сбросить' type='reset' />
-						<Button title='Применить' type='submit' />
+						<Button title='Сбросить' type='clear' />
+						<Button title='Применить' type='apply' />
 					</div>
 				</form>
 			</aside>
